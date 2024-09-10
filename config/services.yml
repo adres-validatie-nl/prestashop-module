@@ -1,0 +1,57 @@
+services:
+  _defaults:
+    public: true
+
+  # Account email form
+  prestashop.module.adresvalidatie.form.type.email:
+    class: 'PrestaShop\Module\AdresValidatie\Form\AccountEmailFormType'
+    parent: 'form.type.translatable.aware'
+    public: true
+    tags:
+      - { name: form.type }
+
+  prestashop.module.adresvalidatie.form.account_email_data_configuration:
+    class: PrestaShop\Module\AdresValidatie\Form\AccountEmailDataConfiguration
+    arguments:
+      - '@prestashop.adapter.legacy.configuration'
+
+  prestashop.module.adresvalidatie.form.account_email_form_data_provider:
+    class: 'PrestaShop\Module\AdresValidatie\Form\AccountEmailFormDataProvider'
+    arguments:
+      - '@prestashop.module.adresvalidatie.form.account_email_data_configuration'
+
+  prestashop.module.adresvalidatie.form.account_email_form_data_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@prestashop.module.adresvalidatie.form.account_email_form_data_provider'
+      - 'PrestaShop\Module\AdresValidatie\Form\AccountEmailFormType'
+      - 'AccountEmail'
+
+  # Account settings form
+  prestashop.module.adresvalidatie.form.type.settings:
+    class: 'PrestaShop\Module\AdresValidatie\Form\AccountSettingsFormType'
+    parent: 'form.type.translatable.aware'
+    public: true
+    tags:
+      - { name: form.type }
+
+  prestashop.module.adresvalidatie.form.account_settings_data_configuration:
+    class: PrestaShop\Module\AdresValidatie\Form\AccountSettingsDataConfiguration
+    arguments:
+      - '@prestashop.adapter.legacy.configuration'
+
+  prestashop.module.adresvalidatie.form.account_settings_form_data_provider:
+    class: 'PrestaShop\Module\AdresValidatie\Form\AccountSettingsFormDataProvider'
+    arguments:
+      - '@prestashop.module.adresvalidatie.form.account_settings_data_configuration'
+
+  prestashop.module.adresvalidatie.form.account_settings_form_data_handler:
+    class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@prestashop.module.adresvalidatie.form.account_settings_form_data_provider'
+      - 'PrestaShop\Module\AdresValidatie\Form\AccountSettingsFormType'
+      - 'AccountSettings'

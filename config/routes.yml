@@ -1,0 +1,17 @@
+adres_validatie_configuration:
+  path: /adresvalidatie/configuration
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::index'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie
+
+adres_validatie_account_email:
+  path: /adresvalidatie/account-email
+  methods: [GET, POST]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::accountEmail'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie
