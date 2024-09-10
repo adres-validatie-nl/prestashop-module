@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\AdresValidatie\Controller;
 
+use OpenAPI\Client\Api\DefaultApi;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ConfigurationController extends FrameworkBundleAdminController
 {
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     public function index(Request $request): Response
     {
         $accountEmail = $this->getConfiguration()->get('ADRESVALIDATIE_ACCOUNT_EMAIL');
@@ -26,6 +33,7 @@ class ConfigurationController extends FrameworkBundleAdminController
         $templateData = [
             'accountEmail' => $accountEmail,
             'changeAccountUrl' => $this->generateUrl('adres_validatie_account_email'),
+            'checkoutUrl' => $this->generateUrl('adres_validatie_checkout'),
             'loginUrl' => $this->getPortalUrl() . '/auth/login?email=' . $accountEmail,
             'accountSettingsForm' => $form->createView(),
         ];
@@ -99,6 +107,24 @@ class ConfigurationController extends FrameworkBundleAdminController
         return $this->redirectToRoute('adres_validatie_configuration');
     }
 
+    public function checkout(Request $request)
+    {
+        try {
+            $apiInstance = $this->get('prestashop.module.adresvalidatie.api_service')->getApiInstance();
+
+            $apiResponse = $apiInstance->stripeCheckoutSessionPost(
+                $this->generateAbsoluteUrl('adres_validatie_configuration'), // TODO: success url
+                $this->generateAbsoluteUrl('adres_validatie_configuration'), // TODO: cancel url
+            );
+
+            return $this->redirect($apiResponse->getUrl());
+        } catch (\Exception $e) {
+            PrestaShopLogger::addLog('Guzzle error communicating with adres-validatie.api POST /stripe/checkout/session endpoint: "' . $e->getMessage() . '"', 0);
+            $this->flashErrors(['received an error response from adres-validatie.nl, check the prestashop error log or try again later.']);
+            return $this->redirectToRoute('adres_validatie_configuration');
+        }
+    }
+
     private function getApi()
     {
         $config = \OpenAPI\Client\Configuration::getDefaultConfiguration();
@@ -107,7 +133,7 @@ class ConfigurationController extends FrameworkBundleAdminController
             $config->setHost('http://localhost:5006');
         }
 
-        return new \OpenAPI\Client\Api\DefaultApi(new \GuzzleHttp\Client(), $config);
+        return new DefaultApi(new \GuzzleHttp\Client(), $config);
     }
 
     private function isProd()
@@ -125,5 +151,10 @@ class ConfigurationController extends FrameworkBundleAdminController
     private function getPortalUrl()
     {
         return $this->isProd() ? 'https://portal.adres-validatie.nl' : 'http://localhost:5005';
+    }
+
+    private function generateAbsoluteUrl($route)
+    {
+        return $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $this->generateUrl($route);
     }
 }

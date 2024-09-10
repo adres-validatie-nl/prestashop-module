@@ -2,6 +2,9 @@ services:
   _defaults:
     public: true
 
+  prestashop.module.adresvalidatie.api_service:
+    class: 'PrestaShop\Module\AdresValidatie\Service\ApiService'
+
   # Account email form
   prestashop.module.adresvalidatie.form.type.email:
     class: 'PrestaShop\Module\AdresValidatie\Form\AccountEmailFormType'

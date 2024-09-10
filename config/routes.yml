@@ -15,3 +15,12 @@ adres_validatie_account_email:
     # Needed to work with tab system
     _legacy_controller: AdminAdresValidatie
     _legacy_link: AdminAdresValidatie
+
+adres_validatie_checkout:
+  path: /adresvalidatie/checkout
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::checkout'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie

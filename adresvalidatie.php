@@ -26,4 +26,32 @@ class AdresValidatie extends Module
     {
         Tools::redirectAdmin($this->get('router')->generate('adres_validatie_configuration'));
     }
+
+    /**
+     * @return bool
+     */
+    public function install()
+    {
+        if (!parent::install()) {
+            return false;
+        }
+
+        // TODO: migrate up
+        // TODO: register hooks?
+        // TODO: init configuration
+
+        return true;
+    }
+
+    public function uninstall()
+    {
+        if(!parent::uninstall()) {
+            return false;
+        }
+
+        // TODO: migrate down
+        // TODO: delete configuration
+
+        return true;
+    }
 }
