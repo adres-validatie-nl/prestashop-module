@@ -3,7 +3,6 @@
 namespace PrestaShop\Module\AdresValidatie\Service;
 
 use OpenAPI\Client\Api\DefaultApi;
-use Configuration;
 use PrestaShopLogger;
 
 class ApiService
@@ -12,6 +11,16 @@ class ApiService
      * @var DefaultApi
      */
     private $apiInstance;
+
+    /**
+     * @var ConfigurationService
+     */
+    private $configurationService;
+
+    public function __construct(ConfigurationService $configurationService)
+    {
+        $this->configurationService = $configurationService;
+    }
 
     /**
      * @param $authenticate
@@ -47,7 +56,7 @@ class ApiService
         $config = $apiInstance->getConfig();
         $token = $config->getAccessToken();
         if (empty($token)) {
-            $token = Configuration::get('ADRESVALIDATIE_ACCESS_TOKEN');
+            $token = $this->configurationService->get('access_token');
         }
         if ($this->validateToken($token)) {
             $config->setAccessToken($token);
@@ -56,13 +65,13 @@ class ApiService
 
         try {
             $response = $apiInstance->accessTokenPost(
-                Configuration::get('ADRESVALIDATIE_CLIENT_ID'),
-                Configuration::get('ADRESVALIDATIE_CLIENT_SECRET'),
+                $this->configurationService->get('client_id'),
+                $this->configurationService->get('client_secret'),
             );
 
             $token = $response->getAccessToken();
             $config->setAccessToken($token);
-            Configuration::updateValue('ADRESVALIDATIE_ACCESS_TOKEN', $token);
+            $this->configurationService->set('access_token', $token);
 
             return true;
         } catch (\Exception $e) {

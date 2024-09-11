@@ -24,3 +24,21 @@ adres_validatie_checkout:
     # Needed to work with tab system
     _legacy_controller: AdminAdresValidatie
     _legacy_link: AdminAdresValidatie
+
+adres_validatie_checkout_cancel:
+  path: /adresvalidatie/checkout-cancel
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::checkoutCancel'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie
+
+adres_validatie_manage_subscription:
+  path: /adresvalidatie/manage-subscription
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::manageSubscription'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie

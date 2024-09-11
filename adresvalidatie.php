@@ -38,7 +38,6 @@ class AdresValidatie extends Module
 
         // TODO: migrate up
         // TODO: register hooks?
-        // TODO: init configuration
 
         return true;
     }
@@ -50,7 +49,10 @@ class AdresValidatie extends Module
         }
 
         // TODO: migrate down
-        // TODO: delete configuration
+
+        /** @var \PrestaShop\Module\AdresValidatie\Service\ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
+        $configurationService->deleteAll();
 
         return true;
     }

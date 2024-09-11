@@ -4,29 +4,27 @@ declare(strict_types=1);
 
 namespace PrestaShop\Module\AdresValidatie\Form;
 
+use PrestaShop\Module\AdresValidatie\Service\ConfigurationService;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use Validate;
 use Context;
 
 class AccountEmailDataConfiguration implements DataConfigurationInterface
 {
-    public const EMAIL_CONFIGURATION_KEY = 'ADRESVALIDATIE_ACCOUNT_EMAIL';
-
     /**
-     * @var ConfigurationInterface
+     * @var ConfigurationService
      */
-    private $configuration;
+    private $configurationService;
 
-    public function __construct(ConfigurationInterface $configuration)
+    public function __construct(ConfigurationService $configurationService)
     {
-        $this->configuration = $configuration;
+        $this->configurationService = $configurationService;
     }
 
     public function getConfiguration()
     {
         return [
-            'email' => $this->configuration->get(static::EMAIL_CONFIGURATION_KEY) ?? Context::getContext()->employee->email,
+            'email' => $this->configurationService->get('account_email') ?: Context::getContext()->employee->email,
         ];
     }
 
@@ -36,7 +34,7 @@ class AccountEmailDataConfiguration implements DataConfigurationInterface
 
         if ($this->validateConfiguration($configuration)) {
             if (Validate::isEmail($configuration['email'])) {
-                $this->configuration->set(static::EMAIL_CONFIGURATION_KEY, $configuration['email']);
+                $this->configurationService->set('account_email', $configuration['email']);
             } else {
                 $errors[] = 'Invalid email address';
             }

@@ -4,6 +4,11 @@ services:
 
   prestashop.module.adresvalidatie.api_service:
     class: 'PrestaShop\Module\AdresValidatie\Service\ApiService'
+    arguments:
+      - '@prestashop.module.adresvalidatie.configuration_service'
+
+  prestashop.module.adresvalidatie.configuration_service:
+    class: 'PrestaShop\Module\AdresValidatie\Service\ConfigurationService'
 
   # Account email form
   prestashop.module.adresvalidatie.form.type.email:
@@ -16,7 +21,7 @@ services:
   prestashop.module.adresvalidatie.form.account_email_data_configuration:
     class: PrestaShop\Module\AdresValidatie\Form\AccountEmailDataConfiguration
     arguments:
-      - '@prestashop.adapter.legacy.configuration'
+      - '@prestashop.module.adresvalidatie.configuration_service'
 
   prestashop.module.adresvalidatie.form.account_email_form_data_provider:
     class: 'PrestaShop\Module\AdresValidatie\Form\AccountEmailFormDataProvider'
@@ -43,7 +48,7 @@ services:
   prestashop.module.adresvalidatie.form.account_settings_data_configuration:
     class: PrestaShop\Module\AdresValidatie\Form\AccountSettingsDataConfiguration
     arguments:
-      - '@prestashop.adapter.legacy.configuration'
+      - '@prestashop.module.adresvalidatie.configuration_service'
 
   prestashop.module.adresvalidatie.form.account_settings_form_data_provider:
     class: 'PrestaShop\Module\AdresValidatie\Form\AccountSettingsFormDataProvider'

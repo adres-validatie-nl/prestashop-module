@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace PrestaShop\Module\AdresValidatie\Controller;
 
 use OpenAPI\Client\Api\DefaultApi;
+use PrestaShop\Module\AdresValidatie\Service\ApiService;
+use PrestaShop\Module\AdresValidatie\Service\ConfigurationService;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ConfigurationController extends FrameworkBundleAdminController
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     public function index(Request $request): Response
     {
-        $accountEmail = $this->getConfiguration()->get('ADRESVALIDATIE_ACCOUNT_EMAIL');
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
+
+        $accountEmail = $configurationService->get('account_email');
         if (!$accountEmail) {
             return $this->redirectToRoute('adres_validatie_account_email');
         }
@@ -32,8 +31,12 @@ class ConfigurationController extends FrameworkBundleAdminController
 
         $templateData = [
             'accountEmail' => $accountEmail,
+            'subscriptionStatus' => $configurationService->get('subscription_status'),
+            'subscriptionEndsAt' => $configurationService->get('subscription_ends_at'),
             'changeAccountUrl' => $this->generateUrl('adres_validatie_account_email'),
             'checkoutUrl' => $this->generateUrl('adres_validatie_checkout'),
+            'checkoutCancelUrl' => $this->generateUrl('adres_validatie_checkout_cancel'),
+            'manageSubscriptionUrl' => $this->generateUrl('adres_validatie_manage_subscription'),
             'loginUrl' => $this->getPortalUrl() . '/auth/login?email=' . $accountEmail,
             'accountSettingsForm' => $form->createView(),
         ];
@@ -54,6 +57,9 @@ class ConfigurationController extends FrameworkBundleAdminController
 
     public function accountEmail(Request $request)
     {
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
+
         $formDataHandler = $this->get('prestashop.module.adresvalidatie.form.account_email_form_data_handler');
 
         $form = $formDataHandler->getForm();
@@ -74,9 +80,10 @@ class ConfigurationController extends FrameworkBundleAdminController
             return $this->render('@Modules/adresvalidatie/views/templates/admin/account_email_form.html.twig', ['emailForm' => $form->createView()]);
         }
 
-        $api = $this->getApi();
         try {
-            $apiResponse = $api->accountPost(
+            /** @var ApiService $apiService */
+            $apiService = $this->get('prestashop.module.adresvalidatie.api_service');
+            $apiResponse = $apiService->getApiInstance(false)->accountPost(
                 $formData['email'],
                 _PS_BASE_URL_ . __PS_BASE_URI__ . 'index.php?fc=module&module=adresvalidatie&controller=Webhook',
             );
@@ -84,17 +91,17 @@ class ConfigurationController extends FrameworkBundleAdminController
             if ($apiResponse->getCode() === 'account-exists') {
                 $this->addFlash('warning', $this->trans('An account already exists with this email. Try logging in to copy and paste your credentials below.', 'Admin.Notifications.Success'));
 
-                $this->getConfiguration()->remove('ADRESVALIDATIE_CLIENT_ID');
-                $this->getConfiguration()->remove('ADRESVALIDATIE_CLIENT_SECRET');
-                $this->getConfiguration()->remove('ADRESVALIDATIE_HMAC_SECRET');
+                $configurationService->delete('client_id');
+                $configurationService->delete('client_secret');
+                $configurationService->delete('hmac_secret');
 
                 return $this->redirectToRoute('adres_validatie_configuration');
             }
 
             $account = $apiResponse->getAccount();
-            $this->getConfiguration()->set('ADRESVALIDATIE_CLIENT_ID', $account->getClientId());
-            $this->getConfiguration()->set('ADRESVALIDATIE_CLIENT_SECRET', $account->getClientSecret());
-            $this->getConfiguration()->set('ADRESVALIDATIE_HMAC_SECRET', $account->getHmacSecret());
+            $configurationService->set('client_id', $account->getClientId());
+            $configurationService->set('client_secret', $account->getClientSecret());
+            $configurationService->set('hmac_secret', $account->getHmacSecret());
         } catch (\Exception $e) {
             $this->getConfiguration()->remove('ADRESVALIDATIE_ACCOUNT_EMAIL');
             PrestaShopLogger::addLog('Guzzle error communicating with adres-validatie.api POST /account endpoint: "' . $e->getMessage() . '"', 0);
@@ -109,13 +116,19 @@ class ConfigurationController extends FrameworkBundleAdminController
 
     public function checkout(Request $request)
     {
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
+
         try {
+            /** @var DefaultApi $apiInstance */
             $apiInstance = $this->get('prestashop.module.adresvalidatie.api_service')->getApiInstance();
 
             $apiResponse = $apiInstance->stripeCheckoutSessionPost(
-                $this->generateAbsoluteUrl('adres_validatie_configuration'), // TODO: success url
-                $this->generateAbsoluteUrl('adres_validatie_configuration'), // TODO: cancel url
+                $this->generateAbsoluteUrl('adres_validatie_configuration'),
+                $this->generateAbsoluteUrl('adres_validatie_checkout_cancel'),
             );
+
+            $configurationService->set('subscription_status', 'pending');
 
             return $this->redirect($apiResponse->getUrl());
         } catch (\Exception $e) {
@@ -125,15 +138,34 @@ class ConfigurationController extends FrameworkBundleAdminController
         }
     }
 
-    private function getApi()
+    public function checkoutCancel(Request $request)
     {
-        $config = \OpenAPI\Client\Configuration::getDefaultConfiguration();
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
 
-        if (!$this->isProd()) {
-            $config->setHost('http://localhost:5006');
+        if ($configurationService->get('subscription_status') === 'pending') {
+            $configurationService->delete('subscription_status');
         }
 
-        return new DefaultApi(new \GuzzleHttp\Client(), $config);
+        return $this->redirectToRoute('adres_validatie_configuration');
+    }
+
+    public function manageSubscription(Request $request)
+    {
+        try {
+            /** @var DefaultApi $apiInstance */
+            $apiInstance = $this->get('prestashop.module.adresvalidatie.api_service')->getApiInstance();
+
+            $apiResponse = $apiInstance->stripePortalSessionPost(
+                $this->generateAbsoluteUrl('adres_validatie_configuration'),
+            );
+
+            return $this->redirect($apiResponse->getUrl());
+        } catch (\Exception $e) {
+            PrestaShopLogger::addLog('Guzzle error communicating with adres-validatie.api POST /stripe/portal/session endpoint: "' . $e->getMessage() . '"', 0);
+            $this->flashErrors(['received an error response from adres-validatie.nl, check the prestashop error log or try again later.']);
+            return $this->redirectToRoute('adres_validatie_configuration');
+        }
     }
 
     private function isProd()

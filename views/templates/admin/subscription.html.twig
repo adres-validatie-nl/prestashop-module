@@ -3,8 +3,26 @@
         <i class="material-icons">settings</i> {{ 'Subscription'|trans({}, 'Modules.AdresValidatie.Admin') }}
     </h3>
     <div class="card-body">
-        <a class="btn btn-primary" href="{{ checkoutUrl }}">
-            {{ 'Click here'|trans({}, 'Admin.Actions') }}
-        </a>
+        {% if subscriptionStatus == 'pending' %}
+            {{ 'You are in the process of subscribing.'|trans({}, 'Admin.Actions') }}
+            (<a href="{{ checkoutCancelUrl }}">cancel</a>)
+        {% endif %}
+        {% if subscriptionStatus == false %}
+            {{ 'You have no subscription yet. Subscribe to receive up-to-date address data.'|trans({}, 'Admin.Actions') }}
+            <a class="btn btn-primary" href="{{ checkoutUrl }}">
+                {{ 'Subscribe'|trans({}, 'Admin.Actions') }}
+            </a>
+        {% endif %}
+        {% if subscriptionStatus == 'active' %}
+            {% if subscriptionEndsAt %}
+                {{ 'You have an active subscription, which ends at'|trans({}, 'Admin.Actions') }} {{ subscriptionEndsAt | date('Y-m-d H:i:s') }}. <br />
+            {% else %}
+                {{ 'You have an active subscription.'|trans({}, 'Admin.Actions') }} <br />
+            {% endif %}
+            <br />
+            <a class="btn btn-primary" href="{{ manageSubscriptionUrl }}">
+                {{ 'Manage'|trans({}, 'Admin.Actions') }}
+            </a>
+        {% endif %}
     </div>
 </div>

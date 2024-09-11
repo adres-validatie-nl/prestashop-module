@@ -2,32 +2,28 @@
 
 namespace PrestaShop\Module\AdresValidatie\Form;
 
+use PrestaShop\Module\AdresValidatie\Service\ConfigurationService;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
-use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use Validate;
 
 class AccountSettingsDataConfiguration implements DataConfigurationInterface
 {
-    public const CLIENT_ID_CONFIGURATION_KEY = 'ADRESVALIDATIE_CLIENT_ID';
-    public const CLIENT_SECRET_CONFIGURATION_KEY = 'ADRESVALIDATIE_CLIENT_SECRET';
-    public const HMAC_SECRET_CONFIGURATION_KEY = 'ADRESVALIDATIE_HMAC_SECRET';
-
     /**
-     * @var ConfigurationInterface
+     * @var ConfigurationService
      */
-    private $configuration;
+    private $configurationService;
 
-    public function __construct(ConfigurationInterface $configuration)
+    public function __construct(ConfigurationService $configurationService)
     {
-        $this->configuration = $configuration;
+        $this->configurationService = $configurationService;
     }
 
     public function getConfiguration()
     {
         return [
-            'client_id' => $this->configuration->get(static::CLIENT_ID_CONFIGURATION_KEY),
-            'client_secret' => $this->configuration->get(static::CLIENT_SECRET_CONFIGURATION_KEY),
-            'hmac_secret' => $this->configuration->get(static::HMAC_SECRET_CONFIGURATION_KEY),
+            'client_id' => $this->configurationService->get('client_id'),
+            'client_secret' => $this->configurationService->get('client_secret'),
+            'hmac_secret' => $this->configurationService->get('hmac_secret'),
         ];
     }
 
@@ -53,9 +49,9 @@ class AccountSettingsDataConfiguration implements DataConfigurationInterface
             return $errors;
         }
 
-        $this->configuration->set(static::CLIENT_ID_CONFIGURATION_KEY, $configuration['client_id']);
-        $this->configuration->set(static::CLIENT_SECRET_CONFIGURATION_KEY, $configuration['client_secret']);
-        $this->configuration->set(static::HMAC_SECRET_CONFIGURATION_KEY, $configuration['hmac_secret']);
+        $this->configurationService->set('client_id', $configuration['client_id']);
+        $this->configurationService->set('client_secret', $configuration['client_secret']);
+        $this->configurationService->set('hmac_secret', $configuration['hmac_secret']);
 
         return [];
     }
