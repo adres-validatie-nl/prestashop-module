@@ -82,14 +82,7 @@ class ApiService
 
     private function isProd()
     {
-        // to detect my dev environment, HTTP_HOST = prestashop.localhost might not be specific enough
-        if (
-            $_SERVER['DOCUMENT_ROOT'] === '/home/daniel/projects/platforms/prestashop'
-            && $_SERVER['SCRIPT_NAME'] === '/admin613lhosxiiwrv05zuzx/index.php'
-        ) {
-            return false;
-        }
-        return true;
+        return getenv('LOCAL_TEST_SHOP') !== '1';
     }
 
     private function validateToken($token)
