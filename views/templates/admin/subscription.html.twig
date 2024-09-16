@@ -8,7 +8,8 @@
             (<a href="{{ checkoutCancelUrl }}">cancel</a>)
         {% endif %}
         {% if subscriptionStatus == false %}
-            {{ 'You have no subscription yet. Subscribe to receive up-to-date address data.'|trans({}, 'Admin.Actions') }}
+            {{ 'You have no subscription yet. Subscribe to receive up-to-date address data.'|trans({}, 'Admin.Actions') }} <br />
+            <br />
             <a class="btn btn-primary" href="{{ checkoutUrl }}">
                 {{ 'Subscribe'|trans({}, 'Admin.Actions') }}
             </a>

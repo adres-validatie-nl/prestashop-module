@@ -7,8 +7,16 @@ services:
     arguments:
       - '@prestashop.module.adresvalidatie.configuration_service'
 
+  prestashop.module.adresvalidatie.async_service:
+    class: 'PrestaShop\Module\AdresValidatie\Service\AsyncService'
+    arguments:
+      - '@prestashop.module.adresvalidatie.configuration_service'
+
   prestashop.module.adresvalidatie.configuration_service:
     class: 'PrestaShop\Module\AdresValidatie\Service\ConfigurationService'
+
+  prestashop.module.adresvalidatie.database_service:
+    class: 'PrestaShop\Module\AdresValidatie\Service\DatabaseService'
 
   # Account email form
   prestashop.module.adresvalidatie.form.type.email:

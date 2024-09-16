@@ -1,23 +1,29 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
 {% block content %}
-    <div class="card">
-        <h3 class="card-header">
-            <i class="material-icons">settings</i> {{ 'adres-validatie.nl'|trans({}, 'Modules.AdresValidatie.Admin') }}
-        </h3>
-        <div class="card-body">
-            {{ 'Your adres-validatie.nl account is registered to:'|trans({}, 'Modules.AdresValidatie.Admin') }}
-            {{ accountEmail }}
-            (<a href="{{ changeAccountUrl }}">change</a>) <br />
-            To manage your account log in to the adresvalidatie.nl portal: <br />
-            <br />
-            <a href="{{ loginUrl }}" class="btn btn-primary" target="_blank">
-                Manage account
-            </a>
-        </div>
-    </div>
+    {% if (progress != null) %}
+        {% include '@Modules/adresvalidatie/views/templates/admin/import_status.html.twig' %}
+    {% endif %}
+
+    {% include '@Modules/adresvalidatie/views/templates/admin/account_status.html.twig' %}
 
     {% include '@Modules/adresvalidatie/views/templates/admin/subscription.html.twig' %}
 
     {% include '@Modules/adresvalidatie/views/templates/admin/account_settings_form.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {% if (progress != null) %}
+        <script src="{{ asset('../modules/adresvalidatie/views/js/admin/import_status.js') }}"></script>
+        <script>
+            document.adresvalidatie_async_polling_endpoint = "{{ progress['polling_endpoint'] }}";
+            pollImportProgress();
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% if (progress != null) %}
+        <link rel="stylesheet" href="{{ asset('../modules/adresvalidatie/views/css/admin/import_status.css') }}" type="text/css" media="all">
+    {% endif %}
 {% endblock %}

@@ -13,6 +13,11 @@ class ConfigurationService {
         'access_token' => 'ADRESVALIDATIE_ACCESS_TOKEN',
         'subscription_status' => 'ADRESVALIDATIE_SUBSCRIPTION_STATUS',
         'subscription_ends_at' => 'ADRESVALIDATIE_SUBSCRIPTION_ENDS_AT',
+        'ajax_nonce' => 'ADRESVALIDATIE_AJAX_NONCE',
+        'async_activity' => 'ADRESVALIDATIE_ASYNC_ACTIVITY',
+        'csv_filename' => 'ADRESVALIDATIE_CSV_FILENAME',
+        'csv_row_count' => 'ADRESVALIDATIE_CSV_ROW_COUNT',
+        'csv_rows_processed' => 'ADRESVALIDATIE_CSV_ROWS_PROCESSED',
     ];
 
     /**

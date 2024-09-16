@@ -1,0 +1,13 @@
+<div class="card">
+    <h3 class="card-header">
+        {% if progress['async_activity'] == 'process_csv' %}
+            {{ 'Importing file'|trans({}, 'Modules.AdresValidatie.Admin') }}
+        {% endif %}
+    </h3>
+    <div class="card-body">
+        <div id="adresvalidatie-progress-bar">
+            <div id="adresvalidatie-progress-bar-fill" style="width: {{ progress['percentage'] }}%"></div>
+            <div id="adresvalidatie-progress-bar-text">{{ progress['rows_processed'] }}/{{ progress['row_count'] }}</div>
+        </div>
+    </div>
+</div>

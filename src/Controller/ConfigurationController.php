@@ -29,6 +29,8 @@ class ConfigurationController extends FrameworkBundleAdminController
         $form = $formDataHandler->getForm();
         $form->handleRequest($request);
 
+        $progressData = $this->getProgressData(true);
+
         $templateData = [
             'accountEmail' => $accountEmail,
             'subscriptionStatus' => $configurationService->get('subscription_status'),
@@ -39,6 +41,7 @@ class ConfigurationController extends FrameworkBundleAdminController
             'manageSubscriptionUrl' => $this->generateUrl('adres_validatie_manage_subscription'),
             'loginUrl' => $this->getPortalUrl() . '/auth/login?email=' . $accountEmail,
             'accountSettingsForm' => $form->createView(),
+            'progress' => $progressData,
         ];
 
         if (!$form->isSubmitted() || !$form->isValid()) {
@@ -168,6 +171,15 @@ class ConfigurationController extends FrameworkBundleAdminController
         }
     }
 
+    public function asyncStatus(Request $request)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        die(json_encode([
+            'success' => true,
+            'data' => $this->getProgressData(),
+        ]));
+    }
+
     private function isProd()
     {
         // to detect my dev environment, HTTP_HOST = prestashop.localhost might not be specific enough
@@ -188,5 +200,23 @@ class ConfigurationController extends FrameworkBundleAdminController
     private function generateAbsoluteUrl($route)
     {
         return $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $this->generateUrl($route);
+    }
+
+    private function getProgressData($nullWhenDone=false)
+    {
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $this->get('prestashop.module.adresvalidatie.configuration_service');
+
+        if (empty($configurationService->get('async_activity')) && $nullWhenDone) {
+            return null;
+        }
+
+        return [
+            'polling_endpoint' => $this->generateUrl('adres_validatie_async_status'),
+            'async_activity' => $configurationService->get('async_activity'),
+            'row_count' => $configurationService->get('csv_row_count'),
+            'rows_processed' => $configurationService->get('csv_rows_processed'),
+            'percentage' => 3,
+        ];
     }
 }

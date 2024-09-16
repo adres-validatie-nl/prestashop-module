@@ -1,0 +1,31 @@
+#adresvalidatie-progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+#adresvalidatie-progress-bar-fill {
+    height: 30px;
+    background-color: #0073aa;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+    transition: width 0.3s;
+}
+#adresvalidatie-progress-bar-text {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}

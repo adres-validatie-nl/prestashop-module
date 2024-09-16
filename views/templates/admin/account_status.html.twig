@@ -1,0 +1,15 @@
+<div class="card">
+    <h3 class="card-header">
+        <i class="material-icons">settings</i> {{ 'adres-validatie.nl'|trans({}, 'Modules.AdresValidatie.Admin') }}
+    </h3>
+    <div class="card-body">
+        {{ 'Your adres-validatie.nl account is registered to:'|trans({}, 'Modules.AdresValidatie.Admin') }}
+        {{ accountEmail }}
+        (<a href="{{ changeAccountUrl }}">change</a>) <br />
+        To manage your account log in to the adresvalidatie.nl portal: <br />
+        <br />
+        <a href="{{ loginUrl }}" class="btn btn-primary" target="_blank">
+            Manage account
+        </a>
+    </div>
+</div>

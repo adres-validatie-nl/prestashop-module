@@ -42,3 +42,12 @@ adres_validatie_manage_subscription:
     # Needed to work with tab system
     _legacy_controller: AdminAdresValidatie
     _legacy_link: AdminAdresValidatie
+
+adres_validatie_async_status:
+  path: /adresvalidatie/async_status
+  methods: [GET]
+  defaults:
+    _controller: 'PrestaShop\Module\AdresValidatie\Controller\ConfigurationController::asyncStatus'
+    # Needed to work with tab system
+    _legacy_controller: AdminAdresValidatie
+    _legacy_link: AdminAdresValidatie
