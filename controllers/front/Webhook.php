@@ -3,6 +3,7 @@
 include dirname(dirname(dirname(__FILE__))) . '/vendor/autoload.php';
 
 use PrestaShop\Module\AdresValidatie\Service\ConfigurationService;
+use PrestaShop\Module\AdresValidatie\Service\DatabaseService;
 use Symfony\Component\HttpFoundation\Request;
 
 class AdresValidatieWebhookModuleFrontController extends ModuleFrontController
@@ -12,12 +13,18 @@ class AdresValidatieWebhookModuleFrontController extends ModuleFrontController
      */
     private $configurationService;
 
+    /**
+     * @var DatabaseService
+     */
+    private $databaseService;
+
     public function __construct()
     {
         parent::__construct();
 
         // Prestashop does not support auto-wiring for front-controllers
         $this->configurationService = new ConfigurationService();
+        $this->databaseService = new DatabaseService();
     }
 
     public function initContent()
@@ -56,7 +63,12 @@ class AdresValidatieWebhookModuleFrontController extends ModuleFrontController
             exit;
         }
 
-        // TODO: validate nonce, requires a database service first
+        $this->databaseService->deleteExpiredNonces();
+        if ($this->databaseService->doesNonceExist($nonce)) {
+            echo 'The request nonce has been used before. Possible replay attack';
+            exit;
+        }
+        $this->databaseService->storeNonce($nonce, $expiryTime);
 
         $data = json_decode($request->getContent(), true);
         if (empty($data) || empty($data['message'])) {
